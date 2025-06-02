@@ -1,0 +1,47 @@
+# === Node & npm ===
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# === Output ===
+dist/
+build/
+*.local
+
+# === TypeScript ===
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# === Vite ===
+.vite/
+
+# === Jest ===
+coverage/
+.jest/
+jest-cache/
+jest.config.ts
+
+# === Logs ===
+logs/
+*.log
+
+# === Editor ===
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# === Env files ===
+.env
+.env.*.local
+
+# === Misc ===
+*.tgz
+*.bak
+*.orig
