@@ -20,7 +20,7 @@ export class SpireKeyConnector implements WalletConnectorPort {
 
   constructor(private networkConfig: NetworkConfigPort) {
     this.spire = new SpireKey({
-      chainId: this.networkConfig.getConfig().chainwebId,
+      chainId: this.networkConfig.getConfig().chainId,
     });
   }
 

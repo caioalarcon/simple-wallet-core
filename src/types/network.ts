@@ -8,6 +8,7 @@
  */
 export interface NetworkConfig {
   chainwebId: string;
+  chainId: string;
   rpcHost: string;
   apiHost: string;
   gasPrice: number;
