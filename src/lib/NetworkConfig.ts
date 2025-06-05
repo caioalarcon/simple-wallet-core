@@ -11,7 +11,8 @@ import { NetworkConfig, NetworkConfigPort } from '../ports/NetworkConfigPort';
 export class DefaultNetworkConfig implements NetworkConfigPort {
   private config: NetworkConfig = {
     chainwebId: 'testnet04',
-    rpcHost: 'https://api.testnet.chainweb.com', 
+    chainId: '0',
+    rpcHost: 'https://api.testnet.chainweb.com',
     apiHost: 'https://api.testnet.chainweb.com',
     gasPrice: 0.00000001, // Example: 1 * 10^-8 KDA
     gasLimit: 1000,
