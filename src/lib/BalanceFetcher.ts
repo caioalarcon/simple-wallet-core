@@ -8,6 +8,7 @@ import {
   BalanceFetchResult,
 } from '../ports/BalanceFetcherPort';
 import { NetworkConfigPort } from '../ports/NetworkConfigPort';
+import { walletSdk } from '@kadena/wallet-sdk';
 
 /**
  * Concrete implementation of BalanceFetcherPort using fetch.
@@ -19,15 +20,21 @@ export class BalanceFetcher implements BalanceFetcherPort {
    * Fetches the KDA balance for the given address.
    */
   async fetchBalance(address: string): Promise<BalanceFetchResult> {
-    const { rpcHost, chainwebId } = this.networkConfig.getConfig();
+    const { chainwebId, chainId } = this.networkConfig.getConfig();
     try {
-      const url = `${rpcHost}/chainweb/0.0/${chainwebId}/account/balance/${address}`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        return { balance: 0, error: `HTTP ${response.status}` };
+      const details = await walletSdk.getAccountDetails(
+        address,
+        chainwebId,
+        'coin',
+        [chainId as any]
+      );
+      const info = details[0];
+      if (!info || !info.accountDetails) {
+        return { balance: 0, error: 'Account not found' };
       }
-      const json = await response.json();
-      const balance = json.data.balance as number;
+      const rawBalance = info.accountDetails.balance as any;
+      const balance =
+        typeof rawBalance === 'number' ? rawBalance : rawBalance.decimal;
       return { balance, error: null };
     } catch (err: any) {
       return { balance: 0, error: err.message || 'Error fetching balance' };
