@@ -4,7 +4,10 @@
   "description": "Core logic for Simple Wallet Clone (Kadena), without UI.",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "dev": "npm --prefix webapp run dev",
+    "build": "tsc && npm --prefix webapp run build",
+    "prod": "npm --prefix webapp run preview"
   },
   "dependencies": {
     "@kadena/wallet-adapter-core": "^0.0.1-beta.2",

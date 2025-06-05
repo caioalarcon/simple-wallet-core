@@ -15,13 +15,19 @@ npm test
 
 ## Running the Example Web App
 
-The web UI is located in the `webapp` folder and uses Vite. Install the
-dependencies and start the dev server:
+The web UI is located in the `webapp` folder and uses Vite. You can
+start the dev server directly from the project root:
 
 ```bash
-cd webapp
 npm install
 npm run dev
+```
+
+To build the library and web UI and preview the production build run:
+
+```bash
+npm run build
+npm run prod
 ```
 
 Open <http://localhost:5173> in your browser. From the first screen you
