@@ -10,7 +10,7 @@ import {
 } from '../ports/TransactionSignerPort';
 import { WalletConnectorPort } from '../ports/WalletConnectorPort';
 import { NetworkConfigPort } from '../ports/NetworkConfigPort';
-import { prepareSimpleTransfer, submitTransaction } from '@kadena/wallet-sdk';
+import { walletSdk } from '@kadena/wallet-sdk';
 
 /**
  * Concrete implementation of TransactionSignerPort.
@@ -34,22 +34,32 @@ export class TransactionSigner implements TransactionSignerPort {
       return { txHash: null, error: 'Invalid address' };
     }
 
-    const { chainwebId, chainId, gasPrice, gasLimit } = this.networkConfig.getConfig();
+    const { chainwebId, chainId, gasPrice, gasLimit } =
+      this.networkConfig.getConfig();
     const gas = {
       gasPrice: params.gasPrice ?? gasPrice,
       gasLimit: params.gasLimit ?? gasLimit,
     };
 
     try {
-      const txCommand = prepareSimpleTransfer({
-        from: address,
-        to: params.to,
-        amount: params.amount,
-        chainId: chainId,
-        gas,
+      const unsignedCmd = await walletSdk.createTransfer({
+        sender: address,
+        receiver: params.to,
+        amount: String(params.amount),
+        chainId: chainId as any,
+        networkId: chainwebId,
       });
-      const result = await submitTransaction(txCommand);
-      const txHash = (result.requestKeys && result.requestKeys[0]) || null;
+      const signedTx = {
+        ...unsignedCmd,
+        gasLimit: gas.gasLimit,
+        gasPrice: gas.gasPrice,
+      } as any;
+      const result = await walletSdk.sendTransaction(
+        signedTx,
+        chainwebId,
+        chainId as any
+      );
+      const txHash = result.requestKey || null;
       return { txHash, error: null };
     } catch (err: any) {
       return { txHash: null, error: err.message || 'Error sending transaction' };

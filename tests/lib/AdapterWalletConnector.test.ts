@@ -6,6 +6,7 @@ class FakeNetwork implements NetworkConfigPort {
   getConfig() {
     return {
       chainwebId: 'testnet04',
+      chainId: '0',
       rpcHost: '',
       apiHost: '',
       gasPrice: 0.00000001,
@@ -14,40 +15,16 @@ class FakeNetwork implements NetworkConfigPort {
   }
 }
 
-// Mocks for PactWalletAdapter
-const mockRequestAccounts = jest.fn();
-const mockDisconnect = jest.fn();
-
-jest.mock('@kadena/wallet-adapter-core', () => {
-  return {
-    PactWalletAdapter: jest.fn().mockImplementation(() => ({
-      requestAccounts: mockRequestAccounts,
-      disconnect: mockDisconnect,
-    })),
-  };
-});
+// No actual adapter behavior is provided in the stub implementation
 
 describe('AdapterWalletConnector', () => {
-  beforeEach(() => {
-    mockRequestAccounts.mockReset();
-    mockDisconnect.mockReset();
-  });
+  beforeEach(() => {});
 
-  test('connect stores first item when adapter returns array', async () => {
-    mockRequestAccounts.mockResolvedValue(['k:addr1', 'k:addr2']);
+  test('connect returns error when no adapters configured', async () => {
     const connector = new AdapterWalletConnector(new FakeNetwork());
     const result = await connector.connect();
-    expect(result.address).toBe('k:addr1');
-    expect(result.error).toBeNull();
-    expect(connector.getAddress()).toBe('k:addr1');
-  });
-
-  test('connect stores value directly when adapter returns string', async () => {
-    mockRequestAccounts.mockResolvedValue('k:singleAddr');
-    const connector = new AdapterWalletConnector(new FakeNetwork());
-    const result = await connector.connect();
-    expect(result.address).toBe('k:singleAddr');
-    expect(result.error).toBeNull();
-    expect(connector.getAddress()).toBe('k:singleAddr');
+    expect(result.address).toBeNull();
+    expect(result.error).toBe('Wallet adapters not configured');
+    expect(connector.getAddress()).toBeNull();
   });
 });

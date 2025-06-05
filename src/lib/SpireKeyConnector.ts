@@ -9,31 +9,31 @@ import {
   Address,
 } from '../ports/WalletConnectorPort';
 import { NetworkConfigPort } from '../ports/NetworkConfigPort';
-import { SpireKey } from '@kadena/spirekey-sdk';
+import { connect, ConnectedAccount } from '@kadena/spirekey-sdk';
 
 /**
  * Connector implementation for SpireKey (Google OAuth).
  */
 export class SpireKeyConnector implements WalletConnectorPort {
-  private spire: SpireKey;
+  private account: ConnectedAccount | null = null;
   private address: Address = null;
 
-  constructor(private networkConfig: NetworkConfigPort) {
-    this.spire = new SpireKey({
-      chainId: this.networkConfig.getConfig().chainId,
-    });
-  }
+  constructor(private networkConfig: NetworkConfigPort) {}
 
   /**
    * Connects to SpireKey and returns the address.
    */
   async connect(): Promise<WalletConnectionResult> {
     try {
-      const addr: string = await this.spire.login();
-      this.address = addr;
+      const { chainwebId, chainId } = this.networkConfig.getConfig();
+      this.account = await connect(chainwebId, chainId as any);
+      this.address = this.account.accountName;
       return { address: this.address, error: null };
     } catch (err: any) {
-      return { address: null, error: err.message || 'Error connecting via SpireKey' };
+      return {
+        address: null,
+        error: err.message || 'Error connecting via SpireKey',
+      };
     }
   }
 
@@ -41,9 +41,7 @@ export class SpireKeyConnector implements WalletConnectorPort {
    * Disconnects from SpireKey and clears internal state.
    */
   async disconnect(): Promise<void> {
-    if (this.spire && this.spire.logout) {
-      await this.spire.logout();
-    }
+    this.account = null;
     this.address = null;
   }
 
