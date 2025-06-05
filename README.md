@@ -23,6 +23,11 @@ npm install
 npm run dev
 ```
 
+The `postinstall` script automatically installs the web UI dependencies
+whenever you run `npm install` in the project root. This ensures the
+Vite build succeeds without having to manually run `npm install` inside
+the `webapp` directory.
+
 To build the library and web UI and preview the production build run:
 
 ```bash
