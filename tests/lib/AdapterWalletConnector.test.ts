@@ -28,14 +28,17 @@ jest.mock('@kadena/wallet-adapter-core', () => {
   };
 });
 
-jest.mock('@kadena/wallet-adapter-ecko', () => ({
-  eckoAdapter: jest.fn(() => ({ name: 'Ecko' })),
-}));
+var mockEckoAdapter: jest.Mock;
+jest.mock('@kadena/wallet-adapter-ecko', () => {
+  mockEckoAdapter = jest.fn(() => ({ name: 'Ecko' }));
+  return { eckoAdapter: mockEckoAdapter };
+});
 
 beforeEach(() => {
   mockInit.mockReset();
   mockConnect.mockReset();
   mockDisconnect.mockReset();
+  mockEckoAdapter.mockReset();
 });
 
 describe('AdapterWalletConnector', () => {
@@ -43,6 +46,7 @@ describe('AdapterWalletConnector', () => {
     mockConnect.mockResolvedValue({ accountName: 'k:addr1' });
     const connector = new AdapterWalletConnector(new FakeNetwork());
     const result = await connector.connect();
+    expect(mockEckoAdapter).toHaveBeenCalledWith({ networkId: 'testnet04' });
     expect(mockInit).toHaveBeenCalled();
     expect(mockConnect).toHaveBeenCalledWith('Ecko');
     expect(result.address).toBe('k:addr1');
@@ -55,6 +59,7 @@ describe('AdapterWalletConnector', () => {
     const connector = new AdapterWalletConnector(new FakeNetwork());
     await connector.connect();
     await connector.disconnect();
+    expect(mockEckoAdapter).toHaveBeenCalledWith({ networkId: 'testnet04' });
     expect(mockDisconnect).toHaveBeenCalledWith('Ecko');
     expect(connector.getAddress()).toBeNull();
   });

@@ -20,8 +20,8 @@ export class AdapterWalletConnector implements WalletConnectorPort {
   private address: Address = null;
 
   constructor(private networkConfig: NetworkConfigPort) {
-    const chainId = this.networkConfig.getConfig().chainId;
-    this.client = new WalletAdapterClient([eckoAdapter({ networkId: chainId })]);
+    const networkId = this.networkConfig.getConfig().chainwebId;
+    this.client = new WalletAdapterClient([eckoAdapter({ networkId })]);
   }
 
   /**
