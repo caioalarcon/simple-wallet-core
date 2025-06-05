@@ -9,19 +9,19 @@ import {
   Address,
 } from '../ports/WalletConnectorPort';
 import { NetworkConfigPort } from '../ports/NetworkConfigPort';
-import { PactWalletAdapter } from '@kadena/wallet-adapter-core';
+import { WalletAdapterClient } from '@kadena/wallet-adapter-core';
+import { eckoAdapter } from '@kadena/wallet-adapter-ecko';
 
 /**
- * Connector implementation that uses the PactWalletAdapter for browser extensions.
+ * Connector implementation that uses WalletAdapterClient with the Ecko wallet adapter.
  */
 export class AdapterWalletConnector implements WalletConnectorPort {
-  private adapter: PactWalletAdapter;
+  private client: WalletAdapterClient;
   private address: Address = null;
 
   constructor(private networkConfig: NetworkConfigPort) {
-    this.adapter = new PactWalletAdapter({
-      chainId: this.networkConfig.getConfig().chainId,
-    });
+    const chainId = this.networkConfig.getConfig().chainId;
+    this.client = new WalletAdapterClient([eckoAdapter({ networkId: chainId })]);
   }
 
   /**
@@ -29,11 +29,9 @@ export class AdapterWalletConnector implements WalletConnectorPort {
    */
   async connect(): Promise<WalletConnectionResult> {
     try {
-      const result: string | string[] = (await (this.adapter as any).requestAccounts()) as
-        | string
-        | string[];
-      const addr = Array.isArray(result) ? result[0] : result;
-      this.address = addr ?? null;
+      await this.client.init();
+      const account = await this.client.connect('Ecko');
+      this.address = account ? account.accountName : null;
       return { address: this.address, error: null };
     } catch (err: any) {
       return {
@@ -47,10 +45,13 @@ export class AdapterWalletConnector implements WalletConnectorPort {
    * Disconnects the wallet and clears internal state.
    */
   async disconnect(): Promise<void> {
-    if (this.adapter && this.adapter.disconnect) {
-      await this.adapter.disconnect();
+    try {
+      await this.client.disconnect('Ecko');
+    } catch (err) {
+      /* ignore disconnect errors */
+    } finally {
+      this.address = null;
     }
-    this.address = null;
   }
 
   /**

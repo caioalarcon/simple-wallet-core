@@ -1,7 +1,6 @@
 import { AdapterWalletConnector } from '../../src/lib/AdapterWalletConnector';
 import { NetworkConfigPort } from '../../src/ports/NetworkConfigPort';
 
-// Create a fake network config
 class FakeNetwork implements NetworkConfigPort {
   getConfig() {
     return {
@@ -15,40 +14,48 @@ class FakeNetwork implements NetworkConfigPort {
   }
 }
 
-// Mocks for PactWalletAdapter
-const mockRequestAccounts = jest.fn();
+const mockInit = jest.fn();
+const mockConnect = jest.fn();
 const mockDisconnect = jest.fn();
 
 jest.mock('@kadena/wallet-adapter-core', () => {
   return {
-    PactWalletAdapter: jest.fn().mockImplementation(() => ({
-      requestAccounts: mockRequestAccounts,
+    WalletAdapterClient: jest.fn().mockImplementation(() => ({
+      init: mockInit,
+      connect: mockConnect,
       disconnect: mockDisconnect,
     })),
   };
 });
 
-describe('AdapterWalletConnector', () => {
-  beforeEach(() => {
-    mockRequestAccounts.mockReset();
-    mockDisconnect.mockReset();
-  });
+jest.mock('@kadena/wallet-adapter-ecko', () => ({
+  eckoAdapter: jest.fn(() => ({ name: 'Ecko' })),
+}));
 
-  test('connect stores first item when adapter returns array', async () => {
-    mockRequestAccounts.mockResolvedValue(['k:addr1', 'k:addr2']);
+beforeEach(() => {
+  mockInit.mockReset();
+  mockConnect.mockReset();
+  mockDisconnect.mockReset();
+});
+
+describe('AdapterWalletConnector', () => {
+  test('connect stores returned account name', async () => {
+    mockConnect.mockResolvedValue({ accountName: 'k:addr1' });
     const connector = new AdapterWalletConnector(new FakeNetwork());
     const result = await connector.connect();
+    expect(mockInit).toHaveBeenCalled();
+    expect(mockConnect).toHaveBeenCalledWith('Ecko');
     expect(result.address).toBe('k:addr1');
     expect(result.error).toBeNull();
     expect(connector.getAddress()).toBe('k:addr1');
   });
 
-  test('connect stores value directly when adapter returns string', async () => {
-    mockRequestAccounts.mockResolvedValue('k:singleAddr');
+  test('disconnect clears address', async () => {
+    mockConnect.mockResolvedValue({ accountName: 'k:addr1' });
     const connector = new AdapterWalletConnector(new FakeNetwork());
-    const result = await connector.connect();
-    expect(result.address).toBe('k:singleAddr');
-    expect(result.error).toBeNull();
-    expect(connector.getAddress()).toBe('k:singleAddr');
+    await connector.connect();
+    await connector.disconnect();
+    expect(mockDisconnect).toHaveBeenCalledWith('Ecko');
+    expect(connector.getAddress()).toBeNull();
   });
 });
