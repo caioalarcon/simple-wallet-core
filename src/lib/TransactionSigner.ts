@@ -34,7 +34,7 @@ export class TransactionSigner implements TransactionSignerPort {
       return { txHash: null, error: 'Invalid address' };
     }
 
-    const { chainwebId, gasPrice, gasLimit } = this.networkConfig.getConfig();
+    const { chainwebId, chainId, gasPrice, gasLimit } = this.networkConfig.getConfig();
     const gas = {
       gasPrice: params.gasPrice ?? gasPrice,
       gasLimit: params.gasLimit ?? gasLimit,
@@ -45,7 +45,7 @@ export class TransactionSigner implements TransactionSignerPort {
         from: address,
         to: params.to,
         amount: params.amount,
-        chainId: chainwebId,
+        chainId,
         gas,
       });
       const result = await submitTransaction(txCommand);

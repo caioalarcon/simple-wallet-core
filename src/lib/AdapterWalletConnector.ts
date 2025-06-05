@@ -19,8 +19,9 @@ export class AdapterWalletConnector implements WalletConnectorPort {
   private address: Address = null;
 
   constructor(private networkConfig: NetworkConfigPort) {
+    const { chainId } = this.networkConfig.getConfig();
     this.adapter = new PactWalletAdapter({
-      chainId: this.networkConfig.getConfig().chainwebId,
+      chainId,
     });
   }
 

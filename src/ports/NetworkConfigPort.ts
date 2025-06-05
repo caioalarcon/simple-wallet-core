@@ -8,6 +8,7 @@
  */
 export interface NetworkConfig {
   chainwebId: string;   // e.g., 'testnet04'
+  chainId: string;      // chain identifier, e.g., '1'
   rpcHost: string;      // RPC endpoint
   apiHost: string;      // API endpoint for transactions
   gasPrice: number;     // Default gas price
