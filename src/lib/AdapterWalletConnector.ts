@@ -29,11 +29,17 @@ export class AdapterWalletConnector implements WalletConnectorPort {
    */
   async connect(): Promise<WalletConnectionResult> {
     try {
-      const addr: string = await this.adapter.requestAccounts();
-      this.address = addr;
+      const result: string | string[] = (await (this.adapter as any).requestAccounts()) as
+        | string
+        | string[];
+      const addr = Array.isArray(result) ? result[0] : result;
+      this.address = addr ?? null;
       return { address: this.address, error: null };
     } catch (err: any) {
-      return { address: null, error: err.message || 'Error connecting via extension' };
+      return {
+        address: null,
+        error: err.message || 'Error connecting via extension',
+      };
     }
   }
 
