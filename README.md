@@ -39,3 +39,11 @@ Open <http://localhost:5173> in your browser. From the first screen you
 can choose to connect via an extension or Google (SpireKey). After
 connecting, your balance is displayed and you can send funds using a
 simple form.
+
+### Balance Fetching
+
+The SDK's `walletSdk.getAccountDetails` helper does not work reliably in
+browser environments. Instead, `BalanceFetcher` issues raw POST requests
+to the `/pact/api/v1/local` endpoint for each chain (0-19) to read the
+balance. This mirrors how EckoWallet performs balance checks and avoids
+404 errors from the deprecated `/account/balance` route.
