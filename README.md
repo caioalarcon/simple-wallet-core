@@ -31,6 +31,9 @@ npm run prod
 ```
 
 Open <http://localhost:5173> in your browser. From the first screen you
-can choose to connect via an extension or Google (SpireKey). After
-connecting, your balance is displayed and you can send funds using a
-simple form.
+can choose to connect via an extension or Google (SpireKey). The
+extension button is provided as an example only—no wallet adapters are
+configured in the project by default, so clicking it will return the
+"Wallet adapters not configured" message. Connecting via SpireKey works
+when the SDK credentials are properly set up. After connecting, your
+balance is displayed and you can send funds using a simple form.
