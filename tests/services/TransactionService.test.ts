@@ -13,7 +13,7 @@ class FakeConnector implements WalletConnectorPort {
 
 class FakeSigner implements TransactionSignerPort {
   async signAndSend(params: { to: string; amount: number; gasPrice?: number; gasLimit?: number; }): Promise<TxResult> {
-    if (params.to === 'k:destino' && params.amount === 1.23) {
+    if (params.to === 'k:destination' && params.amount === 1.23) {
       return { txHash: 'fakeTxHash123', error: null };
     }
     return { txHash: null, error: 'Invalid parameters' };
@@ -33,7 +33,7 @@ describe('TransactionService', () => {
 
   test('sendSimpleTransfer fails if not connected', async () => {
     await connector.disconnect();
-    const result = await service.sendSimpleTransfer({ to: 'k:destino', amount: 1.23 });
+    const result = await service.sendSimpleTransfer({ to: 'k:destination', amount: 1.23 });
     expect(result.error).toBe('Wallet not connected');
     expect(result.txHash).toBeNull();
   });
@@ -44,12 +44,12 @@ describe('TransactionService', () => {
   });
 
   test('sendSimpleTransfer fails for invalid amount', async () => {
-    const result = await service.sendSimpleTransfer({ to: 'k:destino', amount: 0 });
+    const result = await service.sendSimpleTransfer({ to: 'k:destination', amount: 0 });
     expect(result.error).toBe('Invalid amount');
   });
 
   test('sendSimpleTransfer returns correct txHash', async () => {
-    const result = await service.sendSimpleTransfer({ to: 'k:destino', amount: 1.23 });
+    const result = await service.sendSimpleTransfer({ to: 'k:destination', amount: 1.23 });
     expect(result.txHash).toBe('fakeTxHash123');
     expect(result.error).toBeNull();
   });
