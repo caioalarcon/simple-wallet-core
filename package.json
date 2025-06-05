@@ -7,6 +7,7 @@
     "test": "jest",
     "dev": "npm --prefix webapp run dev",
     "build": "tsc -p tsconfig.build.json && npm --prefix webapp run build",
+    "postinstall": "npm --prefix webapp install",
     "prod": "npm --prefix webapp run preview"
   },
   "dependencies": {

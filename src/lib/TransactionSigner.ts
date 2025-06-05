@@ -42,7 +42,7 @@ export class TransactionSigner implements TransactionSignerPort {
     };
 
     try {
-      const unsignedCmd = walletSdk.createSimpleTransfer({
+      const unsignedCmd = await walletSdk.createTransfer({
         sender: address,
         receiver: params.to,
         amount: String(params.amount),
