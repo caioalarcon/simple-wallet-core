@@ -1,7 +1,6 @@
 import { AdapterWalletConnector } from '../../src/lib/AdapterWalletConnector';
 import { NetworkConfigPort } from '../../src/ports/NetworkConfigPort';
 
-// Create a fake network config
 class FakeNetwork implements NetworkConfigPort {
   getConfig() {
     return {
@@ -15,16 +14,53 @@ class FakeNetwork implements NetworkConfigPort {
   }
 }
 
-// No actual adapter behavior is provided in the stub implementation
+const mockInit = jest.fn();
+const mockConnect = jest.fn();
+const mockDisconnect = jest.fn();
+
+jest.mock('@kadena/wallet-adapter-core', () => {
+  return {
+    WalletAdapterClient: jest.fn().mockImplementation(() => ({
+      init: mockInit,
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+    })),
+  };
+});
+
+var mockEckoAdapter: jest.Mock;
+jest.mock('@kadena/wallet-adapter-ecko', () => {
+  mockEckoAdapter = jest.fn(() => ({ name: 'Ecko' }));
+  return { eckoAdapter: mockEckoAdapter };
+});
+
+beforeEach(() => {
+  mockInit.mockReset();
+  mockConnect.mockReset();
+  mockDisconnect.mockReset();
+  mockEckoAdapter.mockReset();
+});
 
 describe('AdapterWalletConnector', () => {
-  beforeEach(() => {});
-
-  test('connect returns error when no adapters configured', async () => {
+  test('connect stores returned account name', async () => {
+    mockConnect.mockResolvedValue({ accountName: 'k:addr1' });
     const connector = new AdapterWalletConnector(new FakeNetwork());
     const result = await connector.connect();
-    expect(result.address).toBeNull();
-    expect(result.error).toBe('Wallet adapters not configured');
+    expect(mockEckoAdapter).toHaveBeenCalledWith({ networkId: 'testnet04' });
+    expect(mockInit).toHaveBeenCalled();
+    expect(mockConnect).toHaveBeenCalledWith('Ecko');
+    expect(result.address).toBe('k:addr1');
+    expect(result.error).toBeNull();
+    expect(connector.getAddress()).toBe('k:addr1');
+  });
+
+  test('disconnect clears address', async () => {
+    mockConnect.mockResolvedValue({ accountName: 'k:addr1' });
+    const connector = new AdapterWalletConnector(new FakeNetwork());
+    await connector.connect();
+    await connector.disconnect();
+    expect(mockEckoAdapter).toHaveBeenCalledWith({ networkId: 'testnet04' });
+    expect(mockDisconnect).toHaveBeenCalledWith('Ecko');
     expect(connector.getAddress()).toBeNull();
   });
 });

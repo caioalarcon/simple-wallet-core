@@ -9,30 +9,49 @@ import {
   Address,
 } from '../ports/WalletConnectorPort';
 import { NetworkConfigPort } from '../ports/NetworkConfigPort';
+import { WalletAdapterClient } from '@kadena/wallet-adapter-core';
+import { eckoAdapter } from '@kadena/wallet-adapter-ecko';
 
 /**
- * Connector implementation that uses the PactWalletAdapter for browser extensions.
+ * Connector implementation that uses WalletAdapterClient with the Ecko wallet adapter.
  */
 export class AdapterWalletConnector implements WalletConnectorPort {
+  private client: WalletAdapterClient;
   private address: Address = null;
 
-  constructor(private networkConfig: NetworkConfigPort) {}
+  constructor(private networkConfig: NetworkConfigPort) {
+    const networkId = this.networkConfig.getConfig().chainwebId;
+    this.client = new WalletAdapterClient([eckoAdapter({ networkId })]);
+  }
 
   /**
    * Connects to the wallet extension and returns the address.
    */
   async connect(): Promise<WalletConnectionResult> {
-    return {
-      address: null,
-      error: 'Wallet adapters not configured',
-    };
+    try {
+      await this.client.init();
+      const account = await this.client.connect('Ecko');
+      this.address = account ? account.accountName : null;
+      return { address: this.address, error: null };
+    } catch (err: any) {
+      return {
+        address: null,
+        error: err.message || 'Error connecting via extension',
+      };
+    }
   }
 
   /**
    * Disconnects the wallet and clears internal state.
    */
   async disconnect(): Promise<void> {
-    this.address = null;
+    try {
+      await this.client.disconnect('Ecko');
+    } catch (err) {
+      /* ignore disconnect errors */
+    } finally {
+      this.address = null;
+    }
   }
 
   /**
