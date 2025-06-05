@@ -6,6 +6,7 @@ class FakeNetwork implements NetworkConfigPort {
   getConfig() {
     return {
       chainwebId: 'testnet04',
+      chainId: '0',
       rpcHost: '',
       apiHost: '',
       gasPrice: 0.00000001,
