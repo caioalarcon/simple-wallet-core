@@ -58,4 +58,11 @@ describe('WalletService', () => {
     expect(balanceResult.balance).toBe(0);
     expect(balanceResult.error).toBe('Wallet not connected');
   });
+
+  test('disconnectWallet clears connection state', async () => {
+    await service.connectWallet();
+    await service.disconnectWallet();
+    expect(service.isConnected()).toBe(false);
+    expect(service.getAddress()).toBeNull();
+  });
 });
