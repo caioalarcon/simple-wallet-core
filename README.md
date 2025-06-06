@@ -6,6 +6,9 @@ classes for connecting to a wallet, fetching balances and sending simple
 transfer transactions. A minimal React based UI example is available in
 `webapp/`.
 
+This project contains only client-side logic. All functionality is
+implemented in the browser without any backend services.
+
 ## Running Tests
 
 ```bash

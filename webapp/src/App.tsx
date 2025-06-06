@@ -5,6 +5,7 @@ import { SpireKeyConnector } from '@/lib/SpireKeyConnector';
 import { WalletService } from '@/services/WalletService';
 import { TransactionService } from '@/services/TransactionService';
 import { TransactionSigner } from '@/lib/TransactionSigner';
+import { BalanceFetcher } from '@/lib/BalanceFetcher';
 
 const network = new DefaultNetworkConfig();
 
@@ -20,9 +21,7 @@ export default function App() {
     const connector = useSpireKey
       ? new SpireKeyConnector(network)
       : new AdapterWalletConnector(network);
-    const balanceFetcher = new (await import('@/lib/BalanceFetcher')).BalanceFetcher(
-      network
-    );
+    const balanceFetcher = new BalanceFetcher(network);
     const ws = new WalletService(connector, balanceFetcher);
     const connectResult = await ws.connectWallet();
     if (connectResult.error) {
