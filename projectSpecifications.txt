@@ -1,0 +1,311 @@
+Simple Wallet Clone (dApp) Specification
+
+1. Overview
+A minimal Kadena dApp that shows how to connect, get balance, and send KDA using only the official Kadena Wallet SDK and SpireKey (no browser extensions). Every feature must be covered by automated tests, and modules must load in a clear dependency order.
+
+2. Architecture & Stack
+Framework
+
+React (v18+) + TypeScript
+
+Kadena Libraries
+
+@kadena/wallet-adapter (for SpireKey integration)
+
+@kadena/wallet-sdk (for building and signing Pact commands)
+
+Testing
+
+Jest + ts-jest for unit tests
+
+React Testing Library (@testing-library/react) for component tests
+
+msw (Mock Service Worker) for simulating Pact API responses
+
+Tooling
+
+Vite (TypeScript template)
+
+ESLint + Prettier (Kadena style)
+
+Husky + lint-staged for pre-commit linting and tests
+
+Executors (npm scripts)
+
+Development Executor: npm run dev → starts Vite dev server
+
+Test Executor: npm run test → runs Jest tests (unit + component + integration)
+
+3. Folder Structure
+python
+Copy
+Edit
+simple-wallet-clone/
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+├── .eslintrc.js
+├── .prettierrc
+├── README.md
+├── src/
+│   ├── index.tsx                   # React entry
+│   ├── App.tsx                     # Renders main UI
+│   ├── config/
+│   │   └── networkConfig.ts        # NETWORK_ID, CHAIN_ID, RPC_BASE_URL
+│   ├── adapters/
+│   │   └── WalletProvider.tsx      # Exposes useWallet() with SpireKeyAdapter
+│   ├── services/
+│   │   ├── PactService.ts          # buildGetBalanceCode(), fetchBalance()
+│   │   └── TransactionService.ts   # buildTransferCode(), signAndSend()
+│   ├── components/
+│   │   ├── ConnectButton.tsx       # Connect / Disconnect via useWallet()
+│   │   ├── BalanceDisplay.tsx      # Calls fetchBalance() and shows result
+│   │   └── SendButton.tsx          # Inputs: recipient & amount; calls signAndSend()
+│   └── utils/
+│       └── format.ts               # formatKDA(amount: number): string
+└── tests/
+    ├── config/
+    │   └── networkConfig.test.ts
+    ├── adapters/
+    │   └── WalletProvider.test.tsx
+    ├── services/
+    │   ├── PactService.test.ts
+    │   └── TransactionService.test.ts
+    ├── components/
+    │   ├── ConnectButton.test.tsx
+    │   ├── BalanceDisplay.test.tsx
+    │   └── SendButton.test.tsx
+    └── utils/
+        └── format.test.ts
+4. Module Breakdown & Dependencies
+Task A: Project Setup
+
+What: Initialize a new Vite + React + TypeScript project.
+
+How:
+
+npm create vite@latest simple-wallet-clone -- --template react-ts
+
+Install dependencies:
+
+bash
+Copy
+Edit
+npm install @kadena/wallet-adapter @kadena/wallet-sdk
+npm install -D jest ts-jest @testing-library/react @testing-library/jest-dom msw eslint prettier husky lint-staged
+Configure tsconfig.json, vite.config.ts, .eslintrc.js, .prettierrc, jest.config.js.
+
+Dependencies: none
+
+Tests:
+
+npm run dev starts without errors.
+
+npm run lint shows zero issues.
+
+npm run test runs with zero tests (no failures).
+
+Task B: Network Configuration
+
+What: Create src/config/networkConfig.ts exporting:
+
+ts
+Copy
+Edit
+export const NETWORK_ID = "testnet04";
+export const CHAIN_ID = "0";  
+export const RPC_BASE_URL = "https://us1.testnet.chainweb.com/chainweb/0.0/testnet04";
+export const GAS_LIMIT = 1000;
+export const GAS_PRICE = 1.0e-8;
+export const TTL = 600;
+Dependencies: Task A
+
+Tests: networkConfig.test.ts verifies each constant value.
+
+Task C: WalletProvider (SpireKey Only)
+
+What: src/adapters/WalletProvider.tsx that uses SpireKeyWalletAdapter from @kadena/wallet-adapter. Expose a React context hook useWallet() returning:
+
+ts
+Copy
+Edit
+interface WalletContext {
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  isConnected: boolean;
+  account: string | null;
+  signPayload(cmdBase64: string): Promise<string>;
+}
+How:
+
+Instantiate new SpireKeyWalletAdapter({ networkId: NETWORK_ID });
+
+Provide connect(), disconnect(), isConnected, account, and signPayload() through context.
+
+signPayload(cmdBase64) internally calls the adapter’s signTransaction({ cmd: cmdBase64 }).
+
+Dependencies: Task A + Task B
+
+Tests: WalletProvider.test.tsx with mocked SpireKeyWalletAdapter:
+
+Before connect(): isConnected === false, account === null.
+
+After mock connect() resolves with public key, isConnected === true, account set.
+
+signPayload() returns a fake signed string.
+
+Task D: ConnectButton Component
+
+What: src/components/ConnectButton.tsx rendering a button that:
+
+If not connected: shows “Connect Wallet”; on click → connect().
+
+If connected: shows “Disconnect”; on click → disconnect().
+
+Disable button while connect() or disconnect() promise is pending.
+
+Dependencies: Task C
+
+Tests:
+
+Render with isConnected = false → text “Connect Wallet”; click → calls connect().
+
+Simulate isConnected = true → text “Disconnect”; click → calls disconnect().
+
+Task E: PactService: Balance Query
+
+What: src/services/PactService.ts exporting:
+
+ts
+Copy
+Edit
+buildGetBalanceCode(account: string): string;
+fetchBalance(account: string): Promise<number>;
+How:
+
+buildGetBalanceCode(a): returns "(coin.get-balance 'k:" + a + "')".
+
+fetchBalance(a):
+
+Construct:
+
+ts
+Copy
+Edit
+const cmd = {
+  networkId: NETWORK_ID,
+  payload: { exec: { code: buildGetBalanceCode(a), data: {} } },
+  signers: [],
+  meta: {
+    chainId: CHAIN_ID,
+    sender: a,
+    gasLimit: GAS_LIMIT,
+    gasPrice: GAS_PRICE,
+    ttl: TTL,
+    creationTime: Math.floor(Date.now() / 1000)
+  },
+  nonce: "get-balance"
+};
+const cmdBase64 = Buffer.from(JSON.stringify(cmd), "utf8").toString("base64");
+const response = await fetch(
+  `${RPC_BASE_URL}/chain/${CHAIN_ID}/pact/api/v1/local`,
+  { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cmd: cmdBase64 }) }
+);
+const json = await response.json();
+if (json.result?.status !== "success") throw new Error("Failed to get balance");
+return Number(json.result.data);
+Dependencies: Task B
+
+Tests:
+
+Mock fetch to return { result: { status: "success", data: 123.45 } } → fetchBalance("k:abc") resolves to 123.45.
+
+buildGetBalanceCode("k:abc") returns "(coin.get-balance 'k:abc')".
+
+Task F: BalanceDisplay Component
+
+What: src/components/BalanceDisplay.tsx that:
+
+Uses const { account } = useWallet().
+
+If account === null, renders “Not connected.”
+
+Otherwise, on mount (useEffect), calls fetchBalance(account) and shows:
+
+“Loading...” while waiting
+
+“Balance: X.XXXX KDA” on success
+
+“Error: <message>” on failure
+
+Dependencies: Task C + Task E
+
+Tests:
+
+Mock useWallet() with { account: null } → renders “Not connected.”
+
+Mock useWallet() with { account: "k:abc" } and PactService.fetchBalance resolving 10.5 → renders “Balance: 10.5000 KDA”.
+
+Mock fetchBalance rejecting → renders “Error: Failed to get balance”.
+
+Task G: TransactionService & SendButton Component
+
+What:
+
+src/services/TransactionService.ts with:
+
+ts
+Copy
+Edit
+buildTransferCode(from: string, to: string, amount: number): string;
+signAndSend(from: string, to: string, amount: number): Promise<string>;
+src/components/SendButton.tsx showing:
+
+Input recipient: string
+
+Input amount: number
+
+Button “Send KDA”; on click: if account = useWallet().account is non-null, calls signAndSend(account, recipient, amount) and displays “Tx submitted: <requestKey>” or “Error: <message>”.
+
+How:
+
+buildTransferCode:
+
+lisp
+Copy
+Edit
+(coin.transfer "from-account" "to-account" (read-keyset 'ks) amount)
+signAndSend:
+
+Construct:
+
+ts
+Copy
+Edit
+const keyset = { ks: { pred: "keys-all", keys: [from] } };
+const cmd = {
+  networkId: NETWORK_ID,
+  payload: { exec: { code: buildTransferCode(from, to, amount), data: keyset } },
+  signers: [{ pubKey: from, clist: [ { name: "coin.GAS", args: [] }, { name: "coin.TRANSFER", args: [to, from, amount] } ] }],
+  meta: { chainId: CHAIN_ID, sender: from, gasLimit: GAS_LIMIT, gasPrice: GAS_PRICE, ttl: TTL, creationTime: Math.floor(Date.now() / 1000) },
+  nonce: "transfer"
+};
+const cmdBase64 = Buffer.from(JSON.stringify(cmd), "utf8").toString("base64");
+const signed = await useWallet().signPayload(cmdBase64);
+const resp = await fetch(`${RPC_BASE_URL}/chain/${CHAIN_ID}/pact/api/v1/send`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ cmd: signed })
+});
+const data = await resp.json();
+if (!data.requestKeys?.[0]) throw new Error("Send failed");
+return data.requestKeys[0];
+Dependencies: Task C + Task E
+
+Tests:
+
+Mock useWallet().signPayload to return a dummy “signedBase64”.
+
+Mock fetch for /send to return { requestKeys: ["ABC123"] } → signAndSend(...) resolves "ABC123".
+
+SendButton.test.tsx renders with useWallet().account = "k:from", enters recipient/amount, mocks services, clicks → displays “Tx submitted: ABC123”.
