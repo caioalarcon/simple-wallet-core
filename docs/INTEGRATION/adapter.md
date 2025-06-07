@@ -22,8 +22,13 @@ import { WalletEnvironment } from '@core/application/WalletEnvironment';
 const adapter = new WalletAdapter(WalletEnvironment.connector);
 ```
 
-## Switch RPC URLs
-You can swap between devnet and testnet by passing different RPC URLs to `createWalletEnvironment()`.
+## Switching Network
+Set the `KADENA_NETWORK` environment variable to `testnet` before running any command to target Kadena testnet. The default is `devnet`.
+
+```bash
+export KADENA_NETWORK=testnet
+npm run dev
+```
 
 ## Connection Example
 ```ts

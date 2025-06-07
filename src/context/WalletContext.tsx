@@ -1,10 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { createWalletEnvironment, WalletEnvironmentServices } from '@infra/sdk/createWalletEnvironment';
 
-const walletEnv: WalletEnvironmentServices = createWalletEnvironment(
-  'https://api.testnet.chainweb.com',
-  'testnet04',
-);
+const walletEnv: WalletEnvironmentServices = createWalletEnvironment();
 
 const WalletContext = createContext<WalletEnvironmentServices>(walletEnv);
 

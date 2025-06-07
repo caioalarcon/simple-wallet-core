@@ -24,14 +24,14 @@ Each directory contains a `README.md` or `.gitkeep` to describe its purpose. Imp
 
 `WalletEnvironment.ts` under `src/core/application` exposes wallet services for development using mock adapters. Future integrations can switch implementations centrally without touching UI code.
 
-## Development
-
-Install dependencies and run the following commands:
+## Getting Started
 
 ```bash
-npm run dev    # start development server
-npm run build  # create production build
-npm run test   # run tests
+npm run install    # clean install
+npm run dev        # start with mock adapters
+npm run test       # run tests
+npm run build      # build production bundle
+npm run start      # serve production build
 ```
 
-The project currently contains no runtime logic or tests but the configuration allows teams to begin adding modules immediately.
+The project currently contains no runtime logic or tests but the scripts allow teams to bootstrap the demo quickly.
