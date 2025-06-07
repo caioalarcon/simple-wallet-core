@@ -1,0 +1,13 @@
+{
+  "name": "simple-wallet-core",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'no dev server configured'",
+    "build": "tsc --build",
+    "test": "echo 'no tests yet'"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
