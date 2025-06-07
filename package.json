@@ -8,6 +8,11 @@
     "test": "echo 'no tests yet'"
   },
   "devDependencies": {
+    "@types/events": "^3.0.3",
+    "@types/node": "^22.15.30",
     "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@kadena/wallet-sdk": "^0.2.1"
   }
 }
