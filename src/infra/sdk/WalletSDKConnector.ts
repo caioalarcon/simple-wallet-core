@@ -35,6 +35,10 @@ export class WalletSDKConnector implements WalletConnectorPort {
     this.address = null;
   }
 
+  async isConnected(): Promise<boolean> {
+    return this.address !== null;
+  }
+
   async getAddress(): Promise<string | null> {
     return this.address;
   }

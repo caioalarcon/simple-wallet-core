@@ -15,6 +15,11 @@ export interface WalletConnectorPort {
   disconnect(): Promise<void>;
 
   /**
+   * Check whether the wallet is currently connected.
+   */
+  isConnected(): Promise<boolean>;
+
+  /**
    * Retrieve the currently connected account address. Returns `null`
    * if the wallet is not connected.
    */

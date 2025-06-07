@@ -22,6 +22,10 @@ export class DummyWalletConnector implements WalletConnectorPort {
     this.connected = false;
   }
 
+  async isConnected(): Promise<boolean> {
+    return this.connected;
+  }
+
   async getAddress(): Promise<string | null> {
     return this.connected ? this.address : null;
   }
