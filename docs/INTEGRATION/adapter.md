@@ -1,0 +1,42 @@
+# Wallet Adapter Integration
+
+## Table of Contents
+- [Install](#install)
+- [Wrap Environment](#wrap-environment)
+- [Switch RPC URLs](#switch-rpc-urls)
+- [Connection Example](#connection-example)
+- [Troubleshooting](#troubleshooting)
+- [FAQ](#faq)
+
+## Install
+```bash
+npm install @kadena/wallet-adapter
+```
+
+## Wrap Environment
+Import the adapter and wrap your wallet environment:
+```ts
+import { WalletAdapter } from '@kadena/wallet-adapter';
+import { WalletEnvironment } from '@core/application/WalletEnvironment';
+
+const adapter = new WalletAdapter(WalletEnvironment.connector);
+```
+
+## Switch RPC URLs
+You can swap between devnet and testnet by passing different RPC URLs to `createWalletEnvironment()`.
+
+## Connection Example
+```ts
+adapter.connect();
+adapter.on('connect', () => {
+  console.log('Connected to', adapter.account);
+});
+```
+
+## Troubleshooting
+- Make sure the adapter version matches the SDK version.
+- Restart the dev server after changing RPC URLs.
+
+## FAQ
+**Q: Can I use multiple adapters?**
+A: Yes. Create a new instance for each provider and select the one you need.
