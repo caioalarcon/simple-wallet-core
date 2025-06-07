@@ -22,6 +22,8 @@ src/
 
 Each directory contains a `README.md` or `.gitkeep` to describe its purpose. Implementation code will be added in later tasks.
 
+`WalletEnvironment.ts` under `src/core/application` exposes wallet services for development using mock adapters. Future integrations can switch implementations centrally without touching UI code.
+
 ## Development
 
 Install dependencies and run the following commands:
