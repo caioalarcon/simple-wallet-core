@@ -1,0 +1,24 @@
+{
+  "name": "simple-wallet-core",
+  "version": "1.0.0",
+  "description": "Core logic for Simple Wallet Clone (Kadena), without UI.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "dev": "npm --prefix webapp run dev",
+    "build": "tsc -p tsconfig.build.json && npm --prefix webapp run build",
+    "prod": "npm --prefix webapp run preview"
+  },
+  "dependencies": {
+    "@kadena/wallet-adapter-core": "^0.0.1-beta.2",
+    "@kadena/spirekey-sdk": "^1.0.1",
+    "@kadena/wallet-sdk": "^0.2.1",
+    "cross-fetch": "^3.1.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.4"
+  }
+}
