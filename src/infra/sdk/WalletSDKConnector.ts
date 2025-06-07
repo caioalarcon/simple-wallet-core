@@ -7,39 +7,25 @@ import { WalletConnectorPort } from '@core/application/ports/WalletConnectorPort
  */
 export class WalletSDKConnector implements WalletConnectorPort {
   private sdk: WalletSDK;
-  private address: string | null = null;
-  private readonly networkHost: string;
-  private readonly networkId: string;
-  constructor(networkHost: string, networkId: string) {
+
+  constructor() {
     this.sdk = new WalletSDK();
-    this.networkHost = networkHost;
-    this.networkId = networkId;
   }
 
   async connect(): Promise<void> {
-    try {
-      console.log('Connecting to network', this.networkId);
-      const details = await this.sdk.getAccountDetails(
-        'kadena-placeholder-account',
-        this.networkId,
-        'coin',
-      );
-      this.address = (details[0]?.accountDetails as any)?.account ?? null;
-    } catch (err) {
-      console.error('WalletSDKConnector.connect failed', err);
-      throw err;
-    }
+    await this.sdk.connect();
   }
 
   async disconnect(): Promise<void> {
-    this.address = null;
-  }
-
-  async isConnected(): Promise<boolean> {
-    return this.address !== null;
+    await this.sdk.disconnect();
   }
 
   async getAddress(): Promise<string | null> {
-    return this.address;
+    const accounts = await this.sdk.getAccounts();
+    return accounts[0] ?? null;
+  }
+
+  async isConnected(): Promise<boolean> {
+    return (await this.sdk.getAccounts()).length > 0;
   }
 }

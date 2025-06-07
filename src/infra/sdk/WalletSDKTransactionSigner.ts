@@ -13,24 +13,11 @@ export class WalletSDKTransactionSigner implements TransactionSignerPort {
   }
 
   async signMessage(message: string): Promise<string> {
-    // The SDK does not expose direct message signing; this is a placeholder
-    // that simply returns the base64 encoded message.
-    try {
-      return Buffer.from(`signed:${message}`, 'utf8').toString('base64');
-    } catch (err) {
-      console.error('WalletSDKTransactionSigner.signMessage failed', err);
-      throw err;
-    }
+    return this.sdk.signMessage(message);
   }
 
   async signAndSend(tx: object): Promise<{ txId: string }> {
-    try {
-      const { networkId, chainId } = tx as any;
-      const descriptor = await this.sdk.sendTransaction(tx as any, networkId, chainId);
-      return { txId: descriptor.requestKey };
-    } catch (err) {
-      console.error('WalletSDKTransactionSigner.signAndSend failed', err);
-      throw err;
-    }
+    const txId = await this.sdk.signAndSendTransaction(tx);
+    return { txId };
   }
 }
