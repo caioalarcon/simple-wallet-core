@@ -15,9 +15,10 @@ function createMockEnvironment(): WalletServices {
 }
 
 function createRealEnvironment(): WalletServices {
-  const networkHost = 'https://api.testnet.chainweb.com';
-  const networkId = 'testnet04';
-  return createWalletEnvironment(networkHost, networkId);
+  const env = (globalThis as any).process?.env || {};
+  const network = (env.NETWORK as 'devnet' | 'testnet') || 'testnet';
+  const useAdapter = env.USE_WALLET_ADAPTER === 'true';
+  return createWalletEnvironment(network, useAdapter);
 }
 
 const nodeEnv = (globalThis as any).process?.env?.NODE_ENV;
