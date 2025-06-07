@@ -1,14 +1,23 @@
 import { MockWalletAdapter } from '@infra/mock/MockWalletAdapter';
+import { createWalletEnvironment } from '@infra/sdk/createWalletEnvironment';
+import { WalletConnectorPort } from './ports/WalletConnectorPort';
+import { TransactionSignerPort } from './ports/TransactionSignerPort';
+import { WalletInfoPort } from './ports/WalletInfoPort';
 
-export type WalletServices = typeof MockWalletAdapter;
+export interface WalletServices {
+  connector: WalletConnectorPort;
+  signer: TransactionSignerPort;
+  info: WalletInfoPort;
+}
 
 function createMockEnvironment(): WalletServices {
   return MockWalletAdapter;
 }
 
 function createRealEnvironment(): WalletServices {
-  // Placeholder for future real SDK integration
-  throw new Error('Real wallet environment not implemented');
+  const networkHost = 'https://api.testnet.chainweb.com';
+  const networkId = 'testnet04';
+  return createWalletEnvironment(networkHost, networkId);
 }
 
 const nodeEnv = (globalThis as any).process?.env?.NODE_ENV;
