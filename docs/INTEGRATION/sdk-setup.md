@@ -15,7 +15,7 @@ npm install @kadena/wallet-sdk
 ```
 
 ## Configure Environment
-Update `createWalletEnvironment()` with your desired network host and network ID.
+Choose the network (`devnet` or `testnet`) when calling `createWalletEnvironment()`.
 Set `NODE_ENV=production` in your `.env` file to enable SDK mode.
 
 ## Build and Serve
@@ -30,7 +30,7 @@ Use the SDK-backed services directly:
 ```ts
 import { createWalletEnvironment } from '@infra/sdk/createWalletEnvironment';
 
-const services = createWalletEnvironment('https://api.testnet.chainweb.com', 'testnet04');
+const services = createWalletEnvironment('testnet');
 const sig = await services.signer.signMessage('hello world');
 console.log('Signed with SDK:', sig);
 

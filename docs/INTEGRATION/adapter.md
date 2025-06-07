@@ -22,8 +22,8 @@ import { WalletEnvironment } from '@core/application/WalletEnvironment';
 const adapter = new WalletAdapter(WalletEnvironment.connector);
 ```
 
-## Switch RPC URLs
-You can swap between devnet and testnet by passing different RPC URLs to `createWalletEnvironment()`.
+## Switch Networks
+Choose **devnet** or **testnet** when creating the environment or set `NETWORK=devnet` in your `.env` file. You may override the RPC with `KADENA_RPC_URL`.
 
 ## Connection Example
 ```ts
@@ -38,11 +38,7 @@ Enable the adapter connector when creating the environment:
 ```ts
 import { createWalletEnvironment } from '@infra/sdk/createWalletEnvironment';
 
-const services = createWalletEnvironment(
-  'https://api.testnet.chainweb.com',
-  'testnet04',
-  true,
-);
+const services = createWalletEnvironment('testnet', true);
 await services.connector.connect();
 console.log('Address', await services.connector.getAddress());
 ```

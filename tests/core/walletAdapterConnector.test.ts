@@ -3,7 +3,7 @@ import { WalletAdapterConnector } from '../../src/infra/adapter/WalletAdapterCon
 
 describe('createWalletEnvironment', () => {
   it('uses WalletAdapterConnector when flag is true', () => {
-    const env = createWalletEnvironment('host', 'network', true);
+    const env = createWalletEnvironment('devnet', true);
     expect(env.connector).toBeInstanceOf(WalletAdapterConnector);
   });
 });
