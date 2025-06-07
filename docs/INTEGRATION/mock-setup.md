@@ -36,6 +36,11 @@ import { MockWalletAdapter } from '@infra/mock/MockWalletAdapter';
 
 const services = MockWalletAdapter;
 services.connector.connect();
+// sign a message using the dummy signer
+const signature = await services.signer.signMessage('hello world');
+console.log('Signed with mock:', signature);
+const result = await services.signer.signAndSend({ foo: 'bar' });
+console.log('Tx sent with mock:', result.txId);
 ```
 
 ## Troubleshooting

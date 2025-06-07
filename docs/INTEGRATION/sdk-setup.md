@@ -25,6 +25,23 @@ npm run dev
 ```
 In SDK mode the wallet connects to real endpoints.
 
+## Sample Code
+Use the SDK-backed services directly:
+```ts
+import { createWalletEnvironment } from '@infra/sdk/createWalletEnvironment';
+
+const services = createWalletEnvironment('https://api.testnet.chainweb.com', 'testnet04');
+const sig = await services.signer.signMessage('hello world');
+console.log('Signed with SDK:', sig);
+
+await services.connector.connect();
+const addr = await services.connector.getAddress();
+console.log('Connected address:', addr);
+const { txId } = await services.signer.signAndSend({ foo: 'bar' });
+console.log('Sent tx via SDK:', txId);
+await services.connector.disconnect();
+```
+
 ## Verify
 When you click **Connect Wallet**, the real wallet pop-up appears. You can connect and disconnect as expected.
 

@@ -33,6 +33,20 @@ adapter.on('connect', () => {
 });
 ```
 
+## Sample Code
+Enable the adapter connector when creating the environment:
+```ts
+import { createWalletEnvironment } from '@infra/sdk/createWalletEnvironment';
+
+const services = createWalletEnvironment(
+  'https://api.testnet.chainweb.com',
+  'testnet04',
+  true,
+);
+await services.connector.connect();
+console.log('Address', await services.connector.getAddress());
+```
+
 ## Troubleshooting
 - Make sure the adapter version matches the SDK version.
 - Restart the dev server after changing RPC URLs.
